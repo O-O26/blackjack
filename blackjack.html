@@ -1,0 +1,209 @@
+<!DOCTYPE html lang="en">
+  <head>
+    <style>
+      body{
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        background-color: rgb(18, 114, 42);
+        font-weight: 700;
+        text-align: center;
+      }
+      h1{
+        font-size: 40px;
+        text-align: center;
+        color: goldenrod;
+      }
+      #message{
+        font-style: italic;
+      }
+      p{
+        font-size: 30px;
+        text-align: center;
+        color: whitesmoke;
+      }
+      button{
+        color: #016f32;
+        width: 150px;
+        background-color: goldenrod;
+        padding: 5px 0 5px 0;
+        border: none;
+        border-radius: 2px;
+        margin: 5px 0;
+      }
+    </style>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Blackjack</h1>
+      <p id="message">Want to play a game?</p>
+      <p id="dealer-cards">Dealer's Cards</p>
+      <p id="dealer-sum">Dealer' Sum</p>
+      <p id="cards">Cards</p>
+      <p id="sum">Sum</p>
+      <button id="start-game">Start Game</button>
+      <button id="new-card">New Card</button>
+      <button id="stand">Stand</button>
+      <p id="player-name"></p>
+
+    <script>    
+    let firstCard = " "
+    let secondCard = " "
+    let hasBlackjack = false
+    let isAlive = false
+    let message = " "
+    let messageEl = document.getElementById("message")
+    let sumEl = document.getElementById("sum")
+    let cardsEl = document.querySelector("#cards")
+    let myCards = []
+    let sums = 0
+
+    let dealerFirstCard = " "
+    let dealerSecondCard = " "
+    let dealerIsAlive = false
+    let dealerCards = []
+    let dealerSums = 0
+
+    let player = {
+      name: "Ola", //prompt("What is your name"),
+      chips: 500,
+      sayHello: function() {
+        console.log("Hello Bob")
+      }
+    }
+    player.sayHello()
+    let names = document.getElementById("player-name")
+    names.textContent = `${player.name}: £${player.chips}`
+
+
+    let start = document.getElementById("start-game")
+    start.addEventListener("click", function startGame() {
+      isAlive = true
+      let firstCard = getRandomCard()
+      let secondCard = getRandomCard()
+      myCards = [firstCard, secondCard]
+      sums = firstCard + secondCard
+      renderGame()
+    })
+
+    function getRandomCard() {
+      let randomNumber = Math.floor(Math.random() * 13) + 1
+      if(randomNumber === 1) {
+        return 11
+      } else if(randomNumber > 10){
+        return 10
+      } else{
+        return randomNumber
+      }
+    }
+
+    function renderGame(){
+      cardsEl.textContent = "Your Cards:"
+      for (i = 0; i < myCards.length; i ++){
+        cardsEl.textContent += ` ${myCards[i]} `
+      }
+
+      if (sums <= 20){
+        message = "Under 21, do you want to draw again?"
+        sumEl.textContent = `Your total is ${sums}`
+      }
+      else if (sums === 21){
+        message = "Exactly 21, Blackjack."
+        sumEl.textContent = `Your total is ${sums}`
+        hasBlackjack = true
+      }
+      else {
+        message = "Over 21, sorry you've lost."
+        sumEl.textContent = `Your total is ${sums}`
+        isAlive = false
+      }
+      messageEl.textContent = message
+    }
+    let newCard = document.getElementById("new-card")
+    newCard.addEventListener("click", function newCard() {
+      if(isAlive === true && hasBlackjack === false){
+        let card = getRandomCard()
+        cardsEl.textContent += card
+        sums += card
+        sumEl.textContent = sums
+        myCards.push(card)
+        renderGame()
+      }
+      else{
+        card = ""
+        renderGame()
+      }
+    })
+
+    let stand = document.getElementById("stand")
+    stand.addEventListener("click", function stand() {
+      card = ""
+      sumEl.textContent = `Your total is ${sums}`
+      isAlive = false
+
+      let dealerTotalCards = document.getElementById("dealer-cards")
+      let dealerTotal = document.getElementById("dealer-sum")
+      dealerIsAlive = true
+      dealerFirstCard = getRandomCard()
+      dealerSecondCard = getRandomCard()
+      dealerCards = [dealerFirstCard, dealerSecondCard]
+      dealerSums = dealerFirstCard + dealerSecondCard
+
+      for (i = 0; i < dealerCards.length; i ++){
+        dealerTotalCards.innerText += ` ${dealerCards[i]} `
+      }
+
+      function winner() {
+        if(sums > dealerSums && sums < 22){
+          return "Player wins - Player has a greater score"
+        }
+        else if (sums === 21 && dealerSums!= 21){
+          return "Player Blackjack"
+        }
+        else if (dealerSums === 21 && sums!= 21){
+          return "Dealer Blackjack"
+        }
+        else if(sums === dealerSums && sums === 21){
+          return "Both players got BlackJack"
+        }
+        else if(sums < dealerSums && dealerSums < 22){
+          return "Dealer wins - Dealer has a greater score"
+        }
+        else if (sums === dealerSums && sums < 22){
+          return "Draw"
+        }
+        else if (sums < dealerSums && sums < 22 && dealerSums > 21){
+          return "Player wins - Dealer went over 21"
+        }
+        else if (dealerSums < sums && dealerSums < 22 && sums > 21){
+          return "Dealer wins - Player went over 21"
+        }
+        else{
+          return "Both players lose - Both went over 21"
+        }
+      }
+      
+      if(dealerSums < 16) {
+        let dealerNewCard = getRandomCard()
+        dealerCards.push(dealerNewCard)
+        dealerTotalCards.innerText =`Dealer cards are ${dealerCards}`
+        dealerSums += dealerNewCard
+        dealerTotal.innerText = `Dealer total is ${dealerSums}`
+      }
+      else{
+        dealerTotalCards.innerText =` Dealer cards are ${dealerCards}`
+        dealerTotal.innerText = `Dealer total is ${dealerSums}`
+        dealerIsAlive = false
+      }
+      messageEl.innerText = winner()
+      if (sums === 21 && dealerSums!= 21){
+        messageEl.innerText = "Player Blackjack"
+      }
+    })
+    </script>
+  </body>
+</html>
